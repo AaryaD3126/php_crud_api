@@ -132,5 +132,84 @@ class callBackCrudFunctions
 }
 }
 
+public function updateCustomer($customerInput, $customerParams){
+    global $connection;
+
+        if(!isset($customerParams['id'])){
+            return $this->error422('customer id not found');
+
+        }elseif($customerParams['id'] == null){
+            return $this->error422('Enter customer ID');
+        }
+
+      $customerID = mysqli_real_escape_string($connection, $customerParams['id']);  
+
+        $name = mysqli_real_escape_string($connection, $customerInput['name']);
+        $email = mysqli_real_escape_string($connection, $customerInput['email']);
+        $phone = mysqli_real_escape_string($connection, $customerInput['phone']);
+
+        if (empty(trim($name))) {
+            return $this->error422('Enter your name');
+        } elseif (empty(trim($email))) {
+            return $this->error422('Enter your email');
+        } elseif (empty(trim($phone))) {
+            return $this->error422('Enter your phone');
+        } else {
+            $query = "UPDATE customers SET name='$name', email='$email', phone='$phone' WHERE id='$customerID'";
+            $runQuery = mysqli_query($connection, $query);
+
+            if ($runQuery) {
+                $data = [
+                    'status' => 201,
+                    'message' => 'Customer updated!',
+                ];
+                header("HTTP/1.0 200 success");
+                echo json_encode($data);
+            } else {
+                $data = [
+                    'status' => 500,
+                    'message' => 'Internal server error',
+                ];
+                header("HTTP/1.0 500 Internal Server Error");
+                echo json_encode($data);
+            }
+        }
+
+}
+
+public function deleteCustomer($customerParams){
+    global $connection;
+
+    if(!isset($customerParams['id'])){
+        return $this->error422('customer id not found');
+
+    }elseif($customerParams['id'] == null){
+        return $this->error422('Enter customer ID');
+    }
+
+  $customerID = mysqli_real_escape_string($connection, $customerParams['id']);  
+
+  $query = "DELETE FROM customers WHERE id='$customerID' LIMIT 1";
+  $res = mysqli_query($connection, $query);
+
+  if($res){
+    $data = [
+        'status' => 200,
+        'message' => 'customer deleted!',
+    ];
+    header("HTTP/1.0 200 ok");
+    echo json_encode($data);
+  }else
+  {
+    $data = [
+        'status' => 500,
+        'message' => 'Internal server error',
+    ];
+    header("HTTP/1.0 500 Internal Server Error");
+    echo json_encode($data);
+  }
+
+}
+
 }
 ?>
